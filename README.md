@@ -32,9 +32,14 @@ npm run build       # production build
 
 ## Docs
 - [PRD](docs/PRD.md) — product requirements + RAID/deviation log
-- [Constitution](CONSTITUTION.md) — engineering governance
+- [Constitution](docs/engineering/CONSTITUTION.md) — engineering governance
 - [STATUS](STATUS.md) — what's live / stubbed / blocked
-- [Changelog](CHANGELOG.md) · [Sprints](docs/sprints/)
+- [Decisions](docs/decisions.md) · [ADRs](docs/adr/) · [Runbooks](docs/runbooks/)
+- [Changelog](CHANGELOG.md) · [Sprints](docs/sprints/) · [Evidence](docs/evidence/)
+
+## Context for AI agents
+- `.ai/context/00_index.md` — session routing map (00–12 briefs mirror `docs/`)
+- `.ai/agents/` — architect / auditor / builder agent contracts
 
 ## Repo structure
 ```
@@ -44,7 +49,8 @@ src/lib/            # supabase, auth, whatsapp, mpesa, queue, logger, constants
 src/types/          # domain types + database types
 supabase/           # migrations + seed
 __tests__/          # vitest suites (incl. P0 bug scaffolds)
-docs/               # PRD, sprints, evidence
+docs/               # PRD, architecture, decisions/ADRs, runbooks, sprints, evidence
+.ai/                # context briefs (00-12) + agent contracts
 ```
 
 ## Operator model

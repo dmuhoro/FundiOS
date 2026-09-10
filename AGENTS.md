@@ -1,13 +1,14 @@
 # AGENTS.md — FundiOS
 
-Read `docs/PRD.md` and `CONSTITUTION.md` first, every session.
+Read `docs/PRD.md` and `docs/engineering/CONSTITUTION.md` first, every session.
 Read `STATUS.md` for the single source of truth of what's live / stubbed / blocked.
+Read `.ai/context/00_index.md` for the agent routing map (context briefs 00–12 mirror `docs/`).
 
 ## Core principles (non-negotiable)
 - Multi-tenant by design: every table `garage_id` + RLS, second garage onboardable by config only.
 - RLS verified at query time, not assumed. Cross-tenant access impossible, proven by test.
 - P0 fixes from Kay's land before any module extraction (queue tenant scope; key-versioned encryption).
-- Fail closed, never fail open. No silent drops. Enforcement at the real boundary (CONSTITUTION.md Art. I).
+- Fail closed, never fail open. No silent drops. Enforcement at the real boundary (CONSTITUTION.md Art. I) — canonical: `docs/engineering/CONSTITUTION.md`.
 - Every automated action audited to `automation_logs` with an idempotency key.
 - Webhooks verify signatures before processing payloads.
 - No service-role keys in client code. Secrets in env vars only (`.env.local.example` documents names only).
