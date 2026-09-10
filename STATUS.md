@@ -66,6 +66,26 @@ foundation is in place and verified where the environment allows:
   `npm test` passes · `npm run build` succeeds warning-free.
 - `.env.local.example` documents all secrets by name (nothing committed).
 
+### Sprint 02 — "Engineering Governance & Context Layer" COMPLETE (2026-09-10) — docs-only
+The engineering context infrastructure is now in place — this is what enables
+any agent/session to boot with a coherent, honest model of the codebase:
+
+- **`.ai/` context set** — VERSION 1.0.0; 3 agent contracts (architect, auditor,
+  builder); 13 context briefs (00–12: index, architecture, system-map, domain-model,
+  code-standards, db-contracts, decisions, release-readiness, security,
+  security-subsystems, roadmap, workflow-rules, evidence). All are summaries +
+  pointers to the canonical docs; never standalone truth.
+- **`docs/adr/`** — ADR-001 (RLS recursion fix / SECURITY DEFINER helper);
+  README with linking conventions.
+- **`docs/engineering/CONSTITUTION.md`** — moved from repo root to match the
+  ecosystem convention (`kays-wellness-centre`, `ShrinkMedia`, `TraderOS`).
+- **Canonical docs**: `architecture.md`, `code-standards.md`, `db-contracts.md`,
+  `decisions.md` (D1–D6), `security.md`, `security-subsystems.md`,
+  `release-readiness.md`, `sprint-cross-reference.md`.
+- **`docs/runbooks/`** — `deployment.md`, `supabase-local.md`, `whatsapp-webhook.md`.
+- **`docs/releases/`** and **`docs/evidence/`** index READMEs.
+- References updated: `AGENTS.md`, `README.md`. No runtime code changed.
+
 ### Fully working (verified)
 - Migration + seed apply cleanly to Postgres (dry-run against throwaway DB)
 - RLS read/write/anonymous isolation proven end-to-end
@@ -89,4 +109,4 @@ foundation is in place and verified where the environment allows:
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-10 — Sprint 01 complete: scaffold, schema + verified RLS, seed, CI, green build/test/lint/typecheck. First commit of the repository; pushed to GitHub.
+2026-09-10 — Sprint 02 complete: engineering governance & context layer (`.ai/` 00–12 + agents, `docs/adr/`, `docs/engineering/CONSTITUTION.md`, canonical docs, runbooks, releases/evidence indexes). Sprint 01 had shipped the scaffold, schema + verified RLS, seed, CI, and a green build/test/lint/typecheck — first repo commits pushed to GitHub.

@@ -4,6 +4,21 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 02 — Engineering Governance & Context Layer (2026-09-10) — docs-only
+**The engineering context infrastructure that lets any agent/session boot with a coherent model of the codebase.**
+
+Added:
+- **`.ai/` context set**: VERSION 1.0.0; 3 agent contracts (`architect-agent`, `auditor-agent`, `builder-agent`); 13 context briefs (`00_index` → `12_evidence`) mirroring `docs/`.
+- **`docs/adr/`**: ADR-001 (RLS recursion fix via SECURITY DEFINER helper `public.current_garage_id()`) + README with conventions.
+- **`docs/engineering/CONSTITUTION.md`**: moved from repo root (ecosystem convention), references updated in `AGENTS.md`/`README.md`.
+- **Canonical docs**: `architecture.md`, `code-standards.md`, `db-contracts.md`, `decisions.md` (D1–D6), `security.md`, `security-subsystems.md`, `release-readiness.md`, `sprint-cross-reference.md`.
+- **`docs/runbooks/`**: `deployment.md`, `supabase-local.md` (incl. RLS proof procedure), `whatsapp-webhook.md`.
+- **`docs/releases/` + `docs/evidence/` index READMEs**; evidence conventions documented.
+
+Verified (no runtime code changed):
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors
+- `npm test` — green · `npm run build` — succeeds
+
 ### Sprint 01 — Foundation & Scaffold (2026-09-10)
 **Next.js 16.3.4 (App Router) + TypeScript strict + Tailwind v4 + shadcn/ui scaffold.**
 
