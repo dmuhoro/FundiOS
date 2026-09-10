@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local env
+.env
+.env.local
+.env.*.local
+
+# Keep example env files tracked
+!.env.example
+!.env.local.example
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
