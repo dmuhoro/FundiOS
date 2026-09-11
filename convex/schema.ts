@@ -198,6 +198,14 @@ const schema = defineSchema({
     .index("by_tenant", ["tenantId"])
     .index("by_idempotency", ["idempotencyKey"])
     .index("by_due", ["status", "nextAttemptAt"]),
+
+  gmbChecklists: defineTable({
+    tenantId: v.id("tenants"),
+    completedItems: v.array(v.string()),
+    notes: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_tenant", ["tenantId"]),
 });
 
 export default schema;
