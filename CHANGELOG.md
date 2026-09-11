@@ -4,6 +4,24 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 05 — Live Auth + Supabase removal (in progress)
+**Convex Auth wired end-to-end: password provider + JWT keys, middleware gating, login/signup UI, dashboard shell. Supabase removal + WhatsApp HTTP action queued next.**
+
+Added:
+- `JWT_PRIVATE_KEY` + `JWKS` generated and set on Convex dev deployment.
+- `src/middleware.ts`: `convexAuthNextjsMiddleware` gates all non-public routes; public `/login`, `/sign-up`, `/api/auth(.*)`.
+- `src/app/providers.tsx`: `ConvexAuthNextjsProvider` wrapping the app.
+- `src/app/(auth)/login/page.tsx`, `src/app/(auth)/sign-up/page.tsx`: email+password auth forms with error handling.
+- `src/app/(auth)/layout.tsx`: centered auth layout.
+- `src/components/dashboard-nav.tsx`: sign-out button.
+- `src/app/(dashboard)/layout.tsx`: dashboard shell with nav.
+- `src/app/(dashboard)/overview/page.tsx`: displays membership via `useQuery(api.members.myProfile)`.
+- `src/lib/convex.ts`: re-exports `api` from `convex/_generated` for clean client imports.
+
+Changed:
+- `src/app/layout.tsx`: wraps children with `<Providers>` (Convex Auth).
+- `STATUS.md`: Sprint 05 in progress, F1 marked done.
+
 ### Sprint 04 — Convex Pivot Foundation COMPLETE (2026-09-11)
 **Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7); isolation proof moved from SQL-RLS to the Convex function boundary. Full-suite green (55/55, 0 todos).**
 

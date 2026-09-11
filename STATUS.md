@@ -169,13 +169,31 @@ Supabase → Convex at the architecture level (ADR-002 / D7); Convex full-stack 
 - One-time Convex CLI link DONE (`dmuhoro:fundios:dev` → confident-weasel-372)
 
 ### Stubbed / next (in build order — largest/highest-value first)
-1. [ ] **F1** — Live auth flow: Convex Auth email+password, session UI, `requireGarage()` on dashboard layout, RBAC end-to-end (replaces Supabase Auth; ADR-002). Needs `JWT_PRIVATE_KEY` / `JWKS` env (`npx convex env set`).
+1. [x] **F1** — Live auth flow: Convex Auth email+password, session UI, `requireGarage()` on dashboard layout, RBAC end-to-end (replaces Supabase Auth; ADR-002). ✅ JWT keys set on Convex, middleware + root provider, login/signup UI, dashboard shell + overview with membership query.
 2. [ ] **F6 (remaining)** — Convex-backed queue adapter + scheduler replacing the in-memory queue store (`src/lib/queue/notification-queue.ts`); webhook POST enqueue live.
 3. [ ] **F7** — Reminder cron (`convex/scheduler.ts` / scheduled mutation) using `selectReminderCandidates` core; `automation_logs` idempotency on send.
 4. [ ] **F8** — Dashboard KPIs + real-time activity feed (Convex reactive queries).
 5. [ ] **F9** — Super admin tenant view + onboard form.
 6. [ ] **F10** — GMB checklist UI persisted in `tenants.metadata`.
-7. [ ] **Sprint 05** — remove Supabase deps + legacy API routes from the build; `dev:convex` becomes the canonical dev flow.
+7. [ ] **Sprint 05 (remainder)** — WhatsApp webhook as Convex HTTP action; remove Supabase deps + legacy API routes from the build; `dev:convex` becomes canonical dev flow.
+
+## Sprint 05 — Live Auth + Supabase removal IN PROGRESS
+Done this layer:
+- JWT keys (`JWT_PRIVATE_KEY`/`JWKS`) generated and set on Convex dev deployment.
+- `src/middleware.ts`: `convexAuthNextjsMiddleware` gates all non-public routes; public routes `/login`, `/sign-up`, `/api/auth(.*)`.
+- `src/app/providers.tsx`: `ConvexAuthNextjsProvider` wrapping the app.
+- `src/app/layout.tsx`: wraps children with `<Providers>`.
+- Auth pages: `src/app/(auth)/login/page.tsx`, `src/app/(auth)/sign-up/page.tsx` (email+password, error handling, redirect to dashboard).
+- `src/components/dashboard-nav.tsx`: sign-out button.
+- `src/app/(dashboard)/layout.tsx`: dashboard shell with nav.
+- `src/app/(dashboard)/overview/page.tsx`: displays membership via `useQuery(api.members.myProfile)`.
+- `src/lib/convex.ts`: re-exports `api` from `convex/_generated` for clean `@/lib/convex` imports in client code.
+
+Remaining in Sprint 05:
+- WhatsApp webhook → Convex HTTP action (`convex/http.ts` + `convex/whatsapp.ts` with signature verification, fail-closed).
+- Remove all Supabase: deps (`@supabase/ssr`, `@supabase/supabase-js`), `src/lib/supabase/*`, `src/proxy.ts`, `src/lib/auth/permissions.server.ts`, 4 legacy CRM API routes (`src/app/api/{leads,customers,vehicles,services}/route.ts`).
+- Update `.env.local.example`; remove legacy vars; `dev:convex` becomes canonical dev flow.
+- Sprint 05 docs, evidence, STATUS/CHANGELOG finalization, commit, push.
 
 ## Daniel's action items
 - [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) when Sprint 06 (live WhatsApp) starts. **Note: current check — these are EMPTY in `.env.local`; they will be set via `npx convex env set` at Sprint 06.**
@@ -183,4 +201,4 @@ Supabase → Convex at the architecture level (ADR-002 / D7); Convex full-stack 
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-11 — Sprint 04 COMPLETE: Convex foundation + boundary isolation proof green (55/55, 0 todos). CLI link done. Next: F1 live auth (needs JWT keys).
+2026-09-11 — Sprint 05 in progress: auth wired + dashboard shell + overview green (typecheck clean). Next: WhatsApp webhook as Convex HTTP action + Supabase removal.
