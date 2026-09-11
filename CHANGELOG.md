@@ -4,8 +4,8 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
-### Sprint 05 — Live Auth + Supabase removal (in progress)
-**Convex Auth wired end-to-end (password provider + JWT keys, middleware gating, login/signup UI, dashboard shell); WhatsApp webhook now a Convex HTTP action; all Supabase code removed from the build.**
+### Sprint 05 — Live Auth + Supabase removal COMPLETE (2026-09-11)
+**Convex Auth wired end-to-end (password provider + JWT keys, middleware gating, login/signup UI, dashboard shell); WhatsApp webhook now a Convex HTTP action; all Supabase code removed from the build. Full-suite green (61/61, 0 todos).**
 
 Added:
 - `JWT_PRIVATE_KEY` + `JWKS` generated and set on Convex dev deployment.
