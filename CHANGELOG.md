@@ -4,7 +4,23 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
-### Sprint 02 — Engineering Governance & Context Layer (2026-09-10) — docs-only
+### Sprint 03 — 80/20 Execution: P0 Gate + Core Domain (2026-09-11)
+**The critical execution path from "scaffold" to "real module logic with passing gate tests": the two P0 extraction-gate suites now pass on the real module paths, the WhatsApp webhook is signature-verified and fail-closed, and the CRM domain cores are pure, tested, and wired to fail-closed API routes.**
+
+Added:
+- **Encryption** (`src/lib/encryption/encryption.ts`): AES-256-GCM, scrypt-derived per-garage keys, key rotation. Unknown key version throws — silent decryption failures eliminated (P0 Bug 2).
+- **Queue** (`src/lib/queue/notification-queue.ts`): `enqueueJob`/`processGarageQueue` require explicit garage scope; `queue_tenant_mismatch_rejected` audit entry on scope mismatch; idempotency keys; in-memory store for pilot/tests (P0 Bug 1).
+- **P0 gate tests** passing on real paths: `__tests__/encryption/key-rotation.test.ts` (5), `__tests__/whatsapp/cross-tenant-queue.test.ts` (6).
+- **WhatsApp core**: `signature.ts` (constant-time HMAC-SHA256), `webhook.ts` (Zod-envelope → normalized inbound message), `templates.ts` (EN/SW lead auto-reply, welcome-back, follow-up reminder), `garage-lookup.ts` (`tenants.wa_phone_id` resolver with `db_unavailable`).
+- **Webhook POST** (`src/app/api/whatsapp/webhook/route.ts`): signature verify → parse → resolve garage. DB absent → 503 `db_unavailable`; durable queue absent → 503 `queue_not_ready`. No silent drops.
+- **Domain cores**: `money.ts` (integer minor-unit arithmetic), `phone.ts` (+254 normalization), `validations/{lead,customer,vehicle,service}.ts` (Zod), `crm/leads.ts` (capture/convert/flow guards), `crm/services.ts` (deterministic summaries), `reminders/select-due.ts` (due-window candidates).
+- **Fail-closed routes**: `src/app/api/{leads,customers,vehicles,services}/route.ts` — GET list + POST with Zod parse, idempotency via `automation_logs`, audit write, explicit 503/401/403.
+- **Colocated tests** (25): money, phone, leads, services, select-due.
+
+Verified:
+- `npm run lint` — 0 errors · `npm run typecheck` — 0 errors
+- `npm test` — 48 passing, 4 RLS todos (deferred) · `npm run build` — succeeds
+- Evidence: `docs/evidence/sprint-03/closeout.md`; sprint record: `docs/sprints/sprint-03-8020-execution.md`.
 **The engineering context infrastructure that lets any agent/session boot with a coherent model of the codebase.**
 
 Added:
