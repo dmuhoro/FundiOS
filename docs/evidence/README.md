@@ -29,6 +29,8 @@ PASS / FAIL / BLOCKED
 |------|-------|------|---------|
 | 2026-09-10 | Sprint 01 — Foundation & Scaffold closeout (scaffold, RLS proof, seed, build/lint/typecheck/test) | `sprint-01/closeout.md` | PASS |
 | 2026-09-10 | Sprint 02 — Governance & context layer (this scaffold: `.ai/`, `docs/adr|engineering|evidence|releases|runbooks`, canonical docs; green re-run) | `sprint-02/closeout.md` | PASS |
+| 2026-09-11 | Sprint 03 — 80/20 execution (P0 gate suites on real module paths, signature-verified webhook, CRM cores) | `sprint-03/closeout.md` | PASS |
+| 2026-09-11 | Sprint 04 — Convex pivot foundation (function-boundary isolation proof 7/7, full suite 55/55, 0 todos) | `sprint-04/closeout.md` | PASS |
 
 ## Required evidence — pilot-readiness (future)
 

@@ -162,21 +162,25 @@ and individually committed to origin/main:
 - Fail-closed API routes (leads, customers, vehicles, services) with idempotency
 - Green: lint · typecheck · test (48 passing, 4 RLS todos) · build
 
+### Sprint 04 — "Convex Pivot Foundation" COMPLETE (2026-09-11) — backend replaced, proof moved
+Supabase → Convex at the architecture level (ADR-002 / D7); Convex full-stack hosting (no Vercel). Convex data model in `convex/schema.ts` (no unique indexes in Convex 1.45 → check-then-insert idempotency), Password auth via `convex/http.ts`, tenant enforcement at the **function boundary** (`requireGarage`/`requireActiveMemberOf`/`requireSuperAdmin`/`requireTenantDocument` in `convex/lib/authorization.ts`), automation audit in `convex/lib/automation.ts`. Domain functions for tenants/members/customers/vehicles/services/leads (capture + dedupe + convert). Isolation proof moved from SQL-RLS to `convex/isolation.test.ts` (7 tests via `convex-test`); Sprint 01 RLS harness retained as `__tests__/rls/tenant-isolation.legacy.ts` (doc-only).
+- Error codes machine-readable: `UNAUTHENTICATED` · `FORBIDDEN` · `TENANT_SCOPE` · `NOT_FOUND`
+- Green: lint 0 · typecheck 0 · test **55 passed / 11 files / 0 todos** · build succeeds
+- One-time Convex CLI link DONE (`dmuhoro:fundios:dev` → confident-weasel-372)
+
 ### Stubbed / next (in build order — largest/highest-value first)
-1. [ ] **Sprint 04 — Convex pivot foundation (in progress).** Backend replaces Supabase with Convex (ADR-002 / D7). Deps installed (`convex@1.45.0`, `@convex-dev/auth@0.0.95`, `convex-test@0.0.57`, `@auth/core`). Prep-artifacts committed (ADR-002, D7, env example, scripts). **Deployment target: Convex full-stack hosting — no Vercel** (`docs/runbooks/deployment.md`). **BLOCKED on one-time Convex CLI link** — run `npx convex dev` in the repo and select project `confident-weasel-372` (or provide a CLI access token: project → Settings → Access tokens → set as `CONVEX_CLI_ACCESS_TOKEN` in `.env.local`, and `CONVEX_DEPLOYMENT=https://confident-weasel-372.eu-west-1.convex.cloud`). Then: codegen → `convex/schema.ts` (auth tables + tenants/users/customers/vehicles/services/leads/automation_logs/campaigns) → `convex/auth.ts` (Password provider) → multi-tenant helpers (`requireGarage`/`requireSuperAdmin` at the function boundary) → isolation test suite (garage A vs B, anonymous denied) via `convex-test`.
-2. [ ] **F1** — Live auth flow: Convex Auth email+password, session UI, `requireGarage()` on dashboard layout, RBAC end-to-end (replaces Supabase Auth; ADR-002).
-3. [ ] **F6 (remaining)** — Convex-backed queue adapter + scheduler replacing the in-memory queue store (`src/lib/queue/notification-queue.ts`); webhook POST enqueue live.
-4. [ ] **F7** — Reminder cron (`convex/scheduler.ts` / scheduled mutation) using `selectReminderCandidates` core; `automation_logs` idempotency on send.
-5. [ ] **F8** — Dashboard KPIs + real-time activity feed (Convex reactive queries).
-6. [ ] **F9** — Super admin tenant view + onboard form.
-7. [ ] **F10** — GMB checklist UI persisted in `tenants.metadata`.
-8. [ ] **Convex isolation test** — replaces RLS proof (Sprint 01) on the new boundary; `__tests__/rls/tenant-isolation.test.ts` 4 todos migrate to ConvexTest suite.
+1. [ ] **F1** — Live auth flow: Convex Auth email+password, session UI, `requireGarage()` on dashboard layout, RBAC end-to-end (replaces Supabase Auth; ADR-002). Needs `JWT_PRIVATE_KEY` / `JWKS` env (`npx convex env set`).
+2. [ ] **F6 (remaining)** — Convex-backed queue adapter + scheduler replacing the in-memory queue store (`src/lib/queue/notification-queue.ts`); webhook POST enqueue live.
+3. [ ] **F7** — Reminder cron (`convex/scheduler.ts` / scheduled mutation) using `selectReminderCandidates` core; `automation_logs` idempotency on send.
+4. [ ] **F8** — Dashboard KPIs + real-time activity feed (Convex reactive queries).
+5. [ ] **F9** — Super admin tenant view + onboard form.
+6. [ ] **F10** — GMB checklist UI persisted in `tenants.metadata`.
+7. [ ] **Sprint 05** — remove Supabase deps + legacy API routes from the build; `dev:convex` becomes the canonical dev flow.
 
 ## Daniel's action items
-- [ ] **One-time Convex CLI link (blocks Sprint 04 SDK):** in the repo run `npx convex dev`, complete login, select project `confident-weasel-372` **— or** create a CLI access token (Convex → Settings → Access tokens) and put it in `.env.local` as `CONVEX_CLI_ACCESS_TOKEN=<token>` plus `CONVEX_DEPLOYMENT=https://confident-weasel-372.eu-west-1.convex.cloud`. The token route lets the agent/CI link non-interactively.
-- [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) when Sprint 06 (live WhatsApp) starts.
+- [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) when Sprint 06 (live WhatsApp) starts. **Note: current check — these are EMPTY in `.env.local`; they will be set via `npx convex env set` at Sprint 06.**
 - [ ] Provide the **Brianna'sOS connecting-layer spec** (data moved, direction, auth, sync cadence, endpoints) — agent will define and build the whole connector; the business contract is the one open input.
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-11 — Sprint 04 prep committed (ADR-002/D7, deps, env, scripts; no-Vercel Convex hosting canonical). Awaiting one-time Convex CLI project link to begin the SDK foundation + isolation proof.
+2026-09-11 — Sprint 04 COMPLETE: Convex foundation + boundary isolation proof green (55/55, 0 todos). CLI link done. Next: F1 live auth (needs JWT keys).

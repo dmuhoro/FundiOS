@@ -4,6 +4,30 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 04 — Convex Pivot Foundation COMPLETE (2026-09-11)
+**Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7); isolation proof moved from SQL-RLS to the Convex function boundary. Full-suite green (55/55, 0 todos).**
+
+Added:
+- `convex/schema.ts`: tenants, members, customers, vehicles, services, leads, automationLogs, campaigns + Convex Auth tables. **No unique indexes** (Convex 1.45 removed them) → idempotency via check-then-insert.
+- `convex/auth.ts` / `convex/auth.config.ts` / `convex/http.ts`: Password provider (`@convex-dev/auth`) with HTTP routes.
+- `convex/lib/authorization.ts`: boundary enforcement `requireMember` / `requireGarage` / `requireActiveMemberOf` / `requireSuperAdmin` / `requireTenantDocument`; typed error payloads (`UNAUTHENTICATED` / `FORBIDDEN` / `TENANT_SCOPE` / `NOT_FOUND`).
+- `convex/lib/automation.ts`: `sha256Hex` + idempotent `logAutomation`.
+- Domain functions: `convex/{tenants,members,customers,vehicles,services,leads}.ts`.
+- `convex/isolation.test.ts`: 7-test boundary proof (`convex-test`): anonymous denied, garage A/B scoping, cross-tenant denial, lead dedupe, deactivated member, integer minor-unit money, scoped+idempotent audit.
+- `docs/sprints/sprint-04-convex-foundation.md`, `docs/evidence/sprint-04/closeout.md`.
+
+Changed:
+- `__tests__/rls/tenant-isolation.test.ts` → `__tests__/rls/tenant-isolation.legacy.ts` (doc-only; Sprint 01 RLS proof superseded by ADR-002 — no `it.todo` remains).
+- `eslint.config.mjs`: ignore `convex/_generated/**` + `convex/.convex-tmp/**`.
+- `.gitignore`: ignore `convex/.convex-tmp/`.
+- `STATUS.md`: Sprint 04 complete; CLI link done; next = F1 (live auth).
+
+Fixed:
+- `requireActiveMemberOf` unwrapping (returned `{ member }` from `requireGarage`), anonymous must throw `UNAUTHENTICATED` not `FORBIDDEN`, `requireTenantDocument` generic, test null-safety + `tenantId`/`tenant` naming. All were typechecks; suite now 0 lint warnings, 0 type errors.
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — 55 passed / 11 files / 0 todos · `npm run build` — succeeds. Evidence: `docs/evidence/sprint-04/closeout.md`.
+
 ### Sprint 04 prep — Convex pivot (2026-09-11)
 **Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7). Full-stack hosting moves to Convex Deployment — no Vercel. SDK foundation begins once the CLI project link is in place.**
 
