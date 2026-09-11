@@ -52,3 +52,6 @@ next-env.d.ts
 # Supabase
 supabase/.temp/
 supabase/.branches/
+
+# Convex workspace build artifacts
+convex/.convex-tmp/

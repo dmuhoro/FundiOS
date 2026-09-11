@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated Convex bindings + workspace build artifacts.
+    "convex/_generated/**",
+    "convex/.convex-tmp/**",
   ]),
 ]);
 
