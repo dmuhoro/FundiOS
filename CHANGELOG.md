@@ -21,6 +21,7 @@ Added:
 Changed:
 - `src/app/layout.tsx`: wraps children with `<Providers>` (Convex Auth).
 - `STATUS.md`: Sprint 05 in progress, F1 marked done.
+- **WhatsApp webhook moved to a Convex HTTP action** (`convex/whatsapp.ts` + route in `convex/http.ts`): signature-verified (WebCrypto HMAC-SHA256), fail-closed codes (`invalid_signature`/`malformed_json`/`unknown_wa_number`), tenant resolved via `tenants.getByWaPhoneId`, inbound leads captured idempotently via `leads.createInbound`. Legacy `src/app/api/whatsapp/webhook/route.ts` + `src/lib/whatsapp/garage-lookup.ts` deleted. `tenants` gained `by_wa_phone` index; `convex/inbound.test.ts` proves per-tenant independence + idempotent re-delivery.
 
 ### Sprint 04 — Convex Pivot Foundation COMPLETE (2026-09-11)
 **Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7); isolation proof moved from SQL-RLS to the Convex function boundary. Full-suite green (55/55, 0 todos).**

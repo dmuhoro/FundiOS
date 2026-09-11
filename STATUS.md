@@ -190,7 +190,7 @@ Done this layer:
 - `src/lib/convex.ts`: re-exports `api` from `convex/_generated` for clean `@/lib/convex` imports in client code.
 
 Remaining in Sprint 05:
-- WhatsApp webhook → Convex HTTP action (`convex/http.ts` + `convex/whatsapp.ts` with signature verification, fail-closed).
+- **WhatsApp webhook → Convex HTTP action DONE** (`convex/http.ts` + `convex/whatsapp.ts`: signature-verified, fail-closed; tenant resolved via `tenants.getByWaPhoneId`; lead captured idempotently via `leads.createInbound`; legacy Next route + `garage-lookup.ts` deleted; `tenants` gained `by_wa_phone` index; inbound proof in `convex/inbound.test.ts`).
 - Remove all Supabase: deps (`@supabase/ssr`, `@supabase/supabase-js`), `src/lib/supabase/*`, `src/proxy.ts`, `src/lib/auth/permissions.server.ts`, 4 legacy CRM API routes (`src/app/api/{leads,customers,vehicles,services}/route.ts`).
 - Update `.env.local.example`; remove legacy vars; `dev:convex` becomes canonical dev flow.
 - Sprint 05 docs, evidence, STATUS/CHANGELOG finalization, commit, push.

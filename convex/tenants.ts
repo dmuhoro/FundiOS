@@ -50,3 +50,13 @@ export const createTenant = mutation({
     });
   },
 });
+
+export const getByWaPhoneId = query({
+  args: { waPhoneId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("tenants")
+      .withIndex("by_wa_phone", (q) => q.eq("waPhoneId", args.waPhoneId))
+      .unique();
+  },
+});

@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireGarage, requireTenantDocument, ForbiddenError } from "./lib/authorization";
-import { normalizePhone, isValidKenyanPhone } from "@/lib/phone";
+import { normalizePhone, isValidKenyanPhone } from "./lib/phone";
 import { logAutomation, sha256Hex } from "./lib/automation";
 
 export const list = query({
@@ -154,5 +154,63 @@ export const convert = mutation({
     });
 
     return { customerId, alreadyConverted: false };
+  },
+});
+
+export const getByPhone = query({
+  args: { tenantId: v.id("tenants"), phone: v.string() },
+  handler: async (ctx, args) => {
+    const normalized = normalizePhone(args.phone);
+    return await ctx.db
+      .query("leads")
+      .withIndex("by_phone", (q) =>
+        q.eq("tenantId", args.tenantId).eq("phone", normalized),
+      )
+      .unique();
+  },
+});
+
+export const createInbound = mutation({
+  args: {
+    tenantId: v.id("tenants"),
+    phone: v.string(),
+    name: v.optional(v.string()),
+    source: v.optional(v.union(v.literal("whatsapp"), v.literal("other"))),
+  },
+  handler: async (ctx, args) => {
+    const normalized = normalizePhone(args.phone);
+    const existing = await ctx.db
+      .query("leads")
+      .withIndex("by_phone", (q) =>
+        q.eq("tenantId", args.tenantId).eq("phone", normalized),
+      )
+      .unique();
+    if (existing) return existing._id;
+
+    const now = Date.now();
+    const leadId = await ctx.db.insert("leads", {
+      tenantId: args.tenantId,
+      phone: normalized,
+      name: args.name,
+      source: args.source ?? "whatsapp",
+      status: "new",
+      convertedCustomerId: undefined,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const idempotencyKey = await sha256Hex(
+      `whatsapp_inbound|${args.tenantId}|${normalized}`,
+    );
+    await logAutomation(ctx, {
+      tenantId: args.tenantId,
+      triggerType: "whatsapp_inbound",
+      entityType: "lead",
+      entityId: leadId,
+      action: "lead_created",
+      idempotencyKey,
+    });
+
+    return leadId;
   },
 });

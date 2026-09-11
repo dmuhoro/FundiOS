@@ -61,7 +61,7 @@ const schema = defineSchema({
     metadata: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_slug", ["slug"]),
+  }).index("by_slug", ["slug"]).index("by_wa_phone", ["waPhoneId"]),
 
   members: defineTable({
     tenantId: v.optional(v.id("tenants")),

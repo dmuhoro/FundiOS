@@ -14,10 +14,13 @@ import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as lib_authorization from "../lib/authorization.js";
 import type * as lib_automation from "../lib/automation.js";
+import type * as lib_phone from "../lib/phone.js";
+import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as members from "../members.js";
 import type * as services from "../services.js";
 import type * as tenants from "../tenants.js";
 import type * as vehicles from "../vehicles.js";
+import type * as whatsapp from "../whatsapp.js";
 
 import type {
   ApiFromModules,
@@ -32,10 +35,13 @@ declare const fullApi: ApiFromModules<{
   leads: typeof leads;
   "lib/authorization": typeof lib_authorization;
   "lib/automation": typeof lib_automation;
+  "lib/phone": typeof lib_phone;
+  "lib/whatsapp": typeof lib_whatsapp;
   members: typeof members;
   services: typeof services;
   tenants: typeof tenants;
   vehicles: typeof vehicles;
+  whatsapp: typeof whatsapp;
 }>;
 
 /**
