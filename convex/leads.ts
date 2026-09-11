@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { requireGarage, requireTenantDocument, ForbiddenError } from "./lib/authorization";
 import { normalizePhone, isValidKenyanPhone } from "./lib/phone";
 import { logAutomation, sha256Hex } from "./lib/automation";
+import { createInboundLead } from "./lib/leadCapture";
 
 export const list = query({
   args: {},
@@ -175,42 +176,31 @@ export const createInbound = mutation({
     tenantId: v.id("tenants"),
     phone: v.string(),
     name: v.optional(v.string()),
-    source: v.optional(v.union(v.literal("whatsapp"), v.literal("other"))),
+    source: v.optional(
+      v.union(
+        v.literal("whatsapp"),
+        v.literal("facebook"),
+        v.literal("instagram"),
+        v.literal("tiktok"),
+        v.literal("google"),
+        v.literal("walk_in"),
+        v.literal("referral"),
+        v.literal("other"),
+      ),
+    ),
+    campaignKey: v.optional(v.string()),
+    message: v.optional(v.string()),
+    trigger: v.optional(v.union(v.literal("whatsapp_inbound"), v.literal("campaign_fired"))),
   },
   handler: async (ctx, args) => {
-    const normalized = normalizePhone(args.phone);
-    const existing = await ctx.db
-      .query("leads")
-      .withIndex("by_phone", (q) =>
-        q.eq("tenantId", args.tenantId).eq("phone", normalized),
-      )
-      .unique();
-    if (existing) return existing._id;
-
-    const now = Date.now();
-    const leadId = await ctx.db.insert("leads", {
+    return createInboundLead(ctx, {
       tenantId: args.tenantId,
-      phone: normalized,
+      phone: args.phone,
       name: args.name,
-      source: args.source ?? "whatsapp",
-      status: "new",
-      convertedCustomerId: undefined,
-      createdAt: now,
-      updatedAt: now,
+      message: args.message,
+      source: args.source,
+      campaignKey: args.campaignKey,
+      trigger: args.trigger,
     });
-
-    const idempotencyKey = await sha256Hex(
-      `whatsapp_inbound|${args.tenantId}|${normalized}`,
-    );
-    await logAutomation(ctx, {
-      tenantId: args.tenantId,
-      triggerType: "whatsapp_inbound",
-      entityType: "lead",
-      entityId: leadId,
-      action: "lead_created",
-      idempotencyKey,
-    });
-
-    return leadId;
   },
 });

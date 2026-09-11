@@ -135,6 +135,7 @@ const schema = defineSchema({
     vehicleModel: v.optional(v.string()),
     message: v.optional(v.string()),
     source: leadSources,
+    campaignKey: v.optional(v.string()),
     status: leadStatuses,
     convertedCustomerId: v.optional(v.id("customers")),
     assignedMemberId: v.optional(v.id("members")),

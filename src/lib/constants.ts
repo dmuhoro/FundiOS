@@ -5,9 +5,11 @@ export const WHATSAPP_BASE_URL = `https://graph.facebook.com/${WHATSAPP_API_VERS
 export const LEAD_SOURCES = [
   "whatsapp",
   "facebook",
+  "instagram",
+  "tiktok",
+  "google",
   "walk_in",
   "referral",
-  "google",
   "other",
 ] as const;
 

@@ -167,6 +167,16 @@ export const onboardTenant = mutation({
   },
 });
 
+export const getBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("tenants")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug.trim().toLowerCase()))
+      .unique();
+  },
+});
+
 export const getByWaPhoneId = query({
   args: { waPhoneId: v.string() },
   handler: async (ctx, args) => {

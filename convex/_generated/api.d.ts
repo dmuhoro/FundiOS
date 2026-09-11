@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as campaigns from "../campaigns.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
 import type * as dashboard from "../dashboard.js";
@@ -17,8 +18,10 @@ import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as lib_authorization from "../lib/authorization.js";
 import type * as lib_automation from "../lib/automation.js";
+import type * as lib_campaign from "../lib/campaign.js";
 import type * as lib_jobs from "../lib/jobs.js";
 import type * as lib_landing from "../lib/landing.js";
+import type * as lib_leadCapture from "../lib/leadCapture.js";
 import type * as lib_phone from "../lib/phone.js";
 import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as lib_whatsappSender from "../lib/whatsappSender.js";
@@ -39,6 +42,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  campaigns: typeof campaigns;
   crons: typeof crons;
   customers: typeof customers;
   dashboard: typeof dashboard;
@@ -47,8 +51,10 @@ declare const fullApi: ApiFromModules<{
   leads: typeof leads;
   "lib/authorization": typeof lib_authorization;
   "lib/automation": typeof lib_automation;
+  "lib/campaign": typeof lib_campaign;
   "lib/jobs": typeof lib_jobs;
   "lib/landing": typeof lib_landing;
+  "lib/leadCapture": typeof lib_leadCapture;
   "lib/phone": typeof lib_phone;
   "lib/whatsapp": typeof lib_whatsapp;
   "lib/whatsappSender": typeof lib_whatsappSender;
