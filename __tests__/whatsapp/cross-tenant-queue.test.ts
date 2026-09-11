@@ -93,7 +93,7 @@ describe("WhatsApp queue — cross-tenant isolation (P0 gate)", () => {
   it("logs a tenant_mismatch error to automation_logs when mismatch detected", async () => {
     const audit = vi.fn();
     const buggyStore: QueueStore = {
-      async create(job) {
+      async create() {
         return { id: "job-b", status: "queued" };
       },
       async fetchPending() {
