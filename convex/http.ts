@@ -2,7 +2,7 @@ import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 import { handleWebhook } from "./whatsapp";
 import { serveLanding } from "./site";
-import { serveCapture } from "./campaign-http";
+import { serveCapture } from "./campaignHttp";
 
 const http = httpRouter();
 auth.addHttpRoutes(http);

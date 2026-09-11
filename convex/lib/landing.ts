@@ -120,9 +120,11 @@ export function buildLandingPage(): string {
 
     <h2>Live endpoints</h2>
     <p class="sub">The Convex site that serves this page also hosts the automation API.</p>
-    <pre class="endpoints">GET  /                          <strong>this landing page</strong>
-POST /api/whatsapp/webhook      inbound WhatsApp (HMAC-verified)
-GET  /api/whatsapp/webhook      Meta webhook verification</pre>
+    <pre class="endpoints">GET  /                        <strong>this landing page</strong>
+POST /api/whatsapp/webhook    inbound WhatsApp (HMAC-verified)
+GET  /api/whatsapp/webhook    Meta webhook verification
+GET  /c/&lt;garage-slug&gt;         campaign capture page (UTM-attributed)
+POST /c/&lt;garage-slug&gt;         campaign capture submission</pre>
 
     <h2>Engineering evidence</h2>
     <p class="sub">Documentation is the product. Read-only artifacts below (canonical copies live in the repo).</p>

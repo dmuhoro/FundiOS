@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as campaignHttp from "../campaignHttp.js";
 import type * as campaigns from "../campaigns.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
@@ -42,6 +43,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  campaignHttp: typeof campaignHttp;
   campaigns: typeof campaigns;
   crons: typeof crons;
   customers: typeof customers;

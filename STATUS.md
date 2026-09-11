@@ -199,6 +199,40 @@ schedules template messages for due, opted-in customers.
   audit, retry→fail cap, processQueue happy/failed paths end-to-end via the
   sender; `__tests__/whatsapp/sender.test.ts` (5) — payload shape + fail-closed.
 
+## Sprint 08 — Acquisition funnel COMPLETE (2026-09-11)
+Every garage now has a live, UTM-attributed capture landing page as the front
+door for social campaigns, feeding tenant-scoped leads with campaign
+attribution — plus a Marketing console that answers which source/campaign the
+leads come from. Strategy + field-intel docs written and committed.
+
+- **Strategy + field-intel layer** — `docs/quickstop/field-audit.md` (garage
+  interview + workflow walk + numbers template: profile, workflows,
+  leads-by-source, marketing spend, AI/Cloud checklist, top-5 inefficiencies,
+  baseline KPIs) and `docs/strategy/founder-playbook.md` (wedge thesis,
+  software-enabled consultancy pricing tiers, SMMA cadence, four-part moat,
+  agent doctrine, gated Alphabet portfolio).
+- **Attribution pipeline** — `leads` gains `campaignKey` + `message` +
+  `trigger`; `LEAD_SOURCES` +2 (instagram/tiktok, 8 total); `tenants.getBySlug`;
+  `convex/lib/leadCapture.ts` shared `createInboundLead` (dedupe by normalized
+  phone within tenant, audited, idempotency keyed on trigger);
+  `campaigns.captureLandingLead` (slug regex + Kenyan-phone validation, unknown
+  slug fail-closed) + `campaignHttp.ts` `serveCapture` HTTP action at
+  `/c/<slug>` (GET form / POST parse / code map 404-401-400 / success page);
+  `convex/lib/campaign.ts` pure edge-safe UTM/capture lib; routes in `http.ts`.
+- **Marketing console** — `dashboard.acquisition` (bySource/byCampaign,
+  conversion rate, untracked, recent masked phones); `/dashboard/marketing`
+  KPI cards + source/campaign tables + recent leads; nav Marketing link.
+- Proof: `convex/campaigns.test.ts` (7) · `convex/dashboard.test.ts` (6, incl.
+  acquisition e2e with masked phone) · `__tests__/campaign/capture-runtime.test.ts`
+  (10). Full gate: **128 tests / 23 files / 0 todos**, lint 0, typecheck 0,
+  build green; live site redeployed and the route verified live fail-closed
+  (`GET /c/BAD_SLUG` → 404 regex gate; `POST /c/quickstop` unknown campaign →
+  400 `Unknown campaign`; malformed payload → 400 `invalid_capture`). The 200
+  happy path is test-proven in-repo; the dev deployment has no onboarded
+  tenant yet, so no live 200 was claimed. Onboard Quickstop (UI/super-admin)
+  to complete the live round-trip.
+- Landing page "Live endpoints" block updated with `GET/POST /c/<garage-slug>`.
+
 ## Sprint 07 — Live product + operator console COMPLETE (2026-09-11)
 The public product is live and branded FundiOS, the dashboard is a real
 operator console (KPIs + activity feed, super admin, GMB launch checklist), and
@@ -250,9 +284,10 @@ Remaining in Sprint 05:
 - Sprint 05 docs (`docs/sprints/`, `docs/evidence/`), STATUS/CHANGELOG finalization, commit layers, push to `main`.
 
 ## Daniel's action items
+- [ ] Onboard the **Quickstop** tenant on the dev deployment (super-admin UI or the onboarding path) so the `/c/quickstop` capture funnel's 200 happy path can be curl-verified live end-to-end (attribution shows in `/dashboard/marketing`).
 - [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) — set via `npx convex env set` when live WhatsApp goes to a real business number. Sender is proven end-to-end but fail-closed `not_configured` until creds land.
 - [ ] Provide the **Brianna'sOS endpoint + webhook secret** and confirm the data-direction list — everything else (contract, signing, client, tests) is done; this unblocks the live round-trip (see `docs/briannaos-connector.md` hand-off checklist).
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-11 — Sprint 07 COMPLETE: FundiOS live site (branded landing at Convex-site root, previously `no matching routes found`), dashboard KPIs + activity feed, super admin onboarding/registry, GMB checklist, Brianna'sOS connector (contract v1, tested, live-wiring blocked on creds). Gate 110 tests / 21 files, lint/typecheck/build green, redeployed + verified. v0.6.1 tagged & released.
+2026-09-11 — Sprint 08 COMPLETE: UTM-attributed capture landing funnel (`/c/<slug>`) feeding tenant-scoped leads with campaign attribution + Marketing console (bySource/byCampaign, masked phones); field-audit template + founder playbook committed. Gate 128 tests / 23 files, lint/typecheck/build green, redeployed + route verified live fail-closed (404 regex gate, 400 unknown campaign, 400 bad payload; happy path test-proven — dev deployment has no onboarded tenant yet). v0.7.0 tagged & released.

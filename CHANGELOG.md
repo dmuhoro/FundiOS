@@ -4,6 +4,24 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 08 — Acquisition funnel COMPLETE (2026-09-11)
+**Every garage now has a live, UTM-attributed capture landing page at `/c/<slug>` — the front door for social ad campaigns — that feeds tenant-scoped leads with campaign attribution, plus a Marketing console that reports which source/campaign converted. Written against the committed field-audit template and founder playbook. Full-suite green (128/128, 0 todos), deployed, tagged v0.7.0.**
+
+Added:
+- `docs/quickstop/field-audit.md` — Quickstop field-audit interview + workflow walk + numbers template (profile, workflows, leads-by-source, marketing spend, AI/Cloud checklist, top-5 inefficiencies, baseline KPIs, owner Q&A, observations log, outputs). `docs/strategy/founder-playbook.md` — wedge thesis, software-enabled consultancy pricing tiers, SMMA cadence, four-part moat, agent doctrine, gated Alphabet portfolio.
+- `convex/schema.ts`: `leads.campaignKey` (optional string). `src/lib/constants.ts`: `LEAD_SOURCES` extended with `instagram` + `tiktok` (8 total).
+- `convex/leads.ts` `createInbound`: widened source union (8 literals) + new args `campaignKey`, `message`, `trigger` (`whatsapp_inbound` | `campaign_fired`), audit keyed on trigger.
+- `convex/lib/leadCapture.ts`: shared `createInboundLead` — dedupe by normalized phone within tenant, audit, idempotency key from trigger. Used by both `createInbound` and `captureLandingLead`.
+- `convex/campaigns.ts` `captureLandingLead`: slug regex + Kenyan-phone validation, unknown slug fail-closed FORBIDDEN. `convex/campaignHttp.ts` `serveCapture` HTTP action at `/c/<slug>` (GET capture form / POST parse / malformed body 400 / code map 404-401-400 / success page). `convex/lib/campaign.ts`: pure edge-safe `parseCaptureForm`, `resolveUtmCampaign`, `buildCapturePage`, `buildCaptureSuccessPage`, `CAPTURE_FIELD_LIMITS`. Routes in `convex/http.ts` (`pathPrefix "/c/"`, GET + POST).
+- `convex/tenants.ts` `getBySlug` (trim/lowercase, `by_slug` index).
+- `convex/dashboard.ts` `acquisition` query: bySource/byCampaign breakdowns, converted + conversion rate, untracked count, recent 8 with masked phones. `src/app/(dashboard)/marketing/page.tsx`: KPI cards + tables + recent leads. Marketing nav link gated on tenant membership.
+- `convex/lib/landing.ts`: live endpoints block now lists `GET/POST /c/<garage-slug>`.
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — **128 passed / 23 files / 0 todos** · `npm run build` — succeeds.
+- `convex/campaigns.test.ts` (7): attributed capture, idempotent dedupe, phone normalization, fail-closed (unknown slug/invalid slug/non-Kenyan phone), cross-tenant isolation. `convex/dashboard.test.ts` (6): acquisition e2e — campaign-landing capture appears in owner funnel with campaign/source attribution and masked phone. `__tests__/campaign/capture-runtime.test.ts` (10): parse accept/reject, UTM mapping, HTML escaping.
+- Live redeploy via `npx convex dev --once`; route verified live fail-closed: `GET /c/BAD_SLUG` → 404 (regex gate), `POST /c/quickstop` (no tenant yet) → 400 `{"error":"FORBIDDEN","message":"Unknown campaign"}`, malformed payload → 400 `invalid_capture`. Landing page 200. The 200 happy path (form render + success) is test-proven in-repo (`campaigns.test.ts`, `capture-runtime.test.ts`, acquisition e2e); the dev deployment has no onboarded tenant yet, so no live 200 was claimed.
+
 ### Sprint 07 — Live product + operator console COMPLETE (2026-09-11)
 **The product is public: a branded FundiOS landing page served at the live Convex-site root (fixing `no matching routes found`), a dashboard that is a real operator console (8 KPIs + live activity feed, super admin onboarding/registry, GMB launch checklist), and Brianna'sOS connector v1 — a tested, contract-driven, fail-closed socket awaiting live credentials. Full-suite green (110/110, 0 todos), deployed, tagged v0.6.1.**
 
