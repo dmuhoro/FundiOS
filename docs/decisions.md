@@ -41,10 +41,17 @@
 **Status:** Accepted (Sprint 01).
 
 ## Open decision points (flag before acting)
-- Notification queue tenant-scope enforcement (P0 Bug 1 from Kay's) — worker must reject/log any job with missing or mismatched `garage_id`.
-- Encryption key-versioned decryption (P0 Bug 2 from Kay's) — decrypt with the version stored in the ciphertext, never the active key.
-- WhatsApp webhook constant-time signature verification in the real POST handler (F6).
+- ~~Notification queue tenant-scope enforcement (P0 Bug 1)~~ — resolved, tests passing (Sprint 03).
+- ~~Encryption key-versioned decryption (P0 Bug 2)~~ — resolved, tests passing (Sprint 03).
+- ~~WhatsApp webhook signature verification~~ — resolved (Sprint 03 POST handler).
+- ~~Supabase backend~~ — superseded by D7; full Convex pivot (Sprint 04).
+
+## D7 — Replace Supabase backend with Convex
+**Context:** Supabase free-tier project limit exhausted; Daniel created a Convex project (`confident-weasel-372`). The PRD-mandated Postgres+RLS+Supabase Auth stack cannot proceed without a paid plan.
+**Decision:** Replace Supabase entirely with Convex for persistence, auth, mutations, and scheduled jobs. Convex Auth with the `Password` provider (email + password) for the pilot (PRD F1). See ADR-002 for full analysis.
+**Consequence:** Multi-tenant isolation shifts from SQL RLS to function-enforced authorization at the Convex mutation/query boundary — the new real boundary per CONSTITUTION Art. I. Isolation must be proven via an in-memory ConvexTest suite (garage A cannot read/write garage B, anonymous denied), replacing the RLS proof in Sprint 01. ADR-001 is superseded for the Convex path. Gains: built-in realtime (F8 activity feed), built-in cron (F7 reminders). PRD §4 Tech Stack deviation recorded.
+**Status:** Accepted (Sprint 04 prep, 2026-09-11).
 
 ---
 
-*Last updated: 2026-09-10 (Sprint 02).*
+*Last updated: 2026-09-11 (Sprint 04 prep — Convex pivot).* 

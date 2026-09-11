@@ -6,7 +6,8 @@
 
 | # | Title | Status |
 |---|-------|--------|
-| 001 | RLS policy pattern → SECURITY DEFINER helper `public.current_garage_id()` | Accepted |
+| 001 | RLS policy pattern → SECURITY DEFINER helper `public.current_garage_id()` | Accepted (Superseded for Convex path) |
+| 002 | Replace Supabase backend with Convex | Accepted |
 
 ## Linking Convention
 
