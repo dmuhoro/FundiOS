@@ -1,47 +1,67 @@
-import { v } from "convex/values";
+import { z } from "zod";
 
-const INBOUND_MESSAGE_SCHEMA = v.object({
-  from: v.string(),
-  id: v.string(),
-  timestamp: v.string(),
-  type: v.optional(v.string()),
-  text: v.optional(v.object({ body: v.optional(v.string()) })),
+const textPayloadSchema = z.object({
+  body: z.string().optional(),
+});
+
+const inboundMessageSchema = z
+  .object({
+    from: z.string(),
+    id: z.string(),
+    timestamp: z.string(),
+    type: z.string().optional(),
+    text: textPayloadSchema.optional(),
+  })
+  .passthrough();
+
+const valueSchema = z.object({
+  metadata: z
+    .object({
+      phone_number_id: z.string().optional(),
+      display_phone_number: z.string().optional(),
+    })
+    .optional(),
+  contacts: z
+    .array(
+      z.object({
+        profile: z.object({ name: z.string().optional() }).optional(),
+        wa_id: z.string().optional(),
+      }),
+    )
+    .optional(),
+  messages: z.array(inboundMessageSchema).optional(),
+});
+
+const changeSchema = z.object({
+  field: z.string(),
+  value: valueSchema,
+});
+
+const envelopeSchema = z.object({
+  object: z.string(),
+  entry: z.array(
+    z.object({
+      id: z.string().optional(),
+      changes: z.array(changeSchema),
+    }),
+  ),
 });
 
 function parseEnvelope(payload: unknown) {
-  if (
-    typeof payload !== "object" ||
-    payload === null ||
-    !("entry" in payload) ||
-    !Array.isArray((payload as Record<string, unknown>).entry)
-  ) {
+  const parsed = envelopeSchema.safeParse(payload);
+  if (!parsed.success) {
     return { ok: false as const, reason: "malformed_envelope" };
   }
 
-  const entry = (payload as Record<string, unknown>).entry as Array<{
-    changes?: Array<{
-      value?: {
-        metadata?: { phone_number_id?: string };
-        messages?: Array<{
-          from: string;
-          id: string;
-          timestamp: string;
-          type?: string;
-          text?: { body?: string };
-        }>;
-      };
-    }>;
-  }>;
-
-  const change = entry[0]?.changes?.[0];
-  const message = change?.value?.messages?.[0];
+  const change = parsed.data.entry[0]?.changes[0];
+  const message = change?.value.messages?.[0];
   if (!message) {
     return { ok: false as const, reason: "no_message" };
   }
 
   return {
     ok: true as const,
-    waPhoneNumberId: change.value?.metadata?.phone_number_id ?? "",
+    waPhoneNumberId: change.value.metadata?.phone_number_id ?? "",
     fromPhone: message.from,
     messageId: message.id,
     timestamp: message.timestamp,
@@ -71,7 +91,6 @@ export async function verifyWhatsAppSignature(input: {
       .join("");
     const expected = `sha256=${expectedHex}`;
     if (expected.length !== signature.length) return false;
-    // Constant-time comparison
     let diff = 0;
     for (let i = 0; i < expected.length; i++) {
       diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
@@ -96,7 +115,12 @@ export function parseWhatsAppEnvelope(
   | { ok: true; message: InboundWhatsAppMessage }
   | { ok: false; code: "malformed_envelope" | "no_message"; reason: string } {
   const result = parseEnvelope(payload);
-  if (!result.ok) return { ok: false, code: result.reason as "malformed_envelope" | "no_message", reason: result.reason };
+  if (!result.ok)
+    return {
+      ok: false,
+      code: result.reason as "malformed_envelope" | "no_message",
+      reason: result.reason,
+    };
   return {
     ok: true,
     message: {

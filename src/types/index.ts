@@ -1,7 +1,3 @@
-// Auto-generate full types from Supabase:
-// npx supabase gen types typescript --local > src/types/database.ts
-// Then re-export from here.
-
 export type UserRole =
   | "owner"
   | "mechanic"

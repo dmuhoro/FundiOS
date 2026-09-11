@@ -55,3 +55,6 @@ supabase/.branches/
 
 # Convex workspace build artifacts
 convex/.convex-tmp/
+
+# Convex tooling scratch (key material, env snapshots, commit drafts)
+/.convex-tmp/

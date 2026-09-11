@@ -5,7 +5,7 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 ## [Unreleased]
 
 ### Sprint 05 — Live Auth + Supabase removal (in progress)
-**Convex Auth wired end-to-end: password provider + JWT keys, middleware gating, login/signup UI, dashboard shell. Supabase removal + WhatsApp HTTP action queued next.**
+**Convex Auth wired end-to-end (password provider + JWT keys, middleware gating, login/signup UI, dashboard shell); WhatsApp webhook now a Convex HTTP action; all Supabase code removed from the build.**
 
 Added:
 - `JWT_PRIVATE_KEY` + `JWKS` generated and set on Convex dev deployment.
@@ -17,11 +17,22 @@ Added:
 - `src/app/(dashboard)/layout.tsx`: dashboard shell with nav.
 - `src/app/(dashboard)/overview/page.tsx`: displays membership via `useQuery(api.members.myProfile)`.
 - `src/lib/convex.ts`: re-exports `api` from `convex/_generated` for clean client imports.
+- `convex/whatsapp.ts` + `convex/lib/whatsapp.ts` + `convex/lib/phone.ts`: WhatsApp HTTP action — GET verify + POST inbound. Signature verified via WebCrypto HMAC-SHA256 (constant-time compare); canonical zod envelope parser (`parseWhatsAppEnvelope`); fail-closed codes `invalid_signature` / `malformed_json` / `unknown_wa_number`; `buildLeadAutoReply` (EN/SW).
+- `convex/schema.ts`: `by_wa_phone` index on `tenants`; `convex/tenants.ts` `getByWaPhoneId`; `convex/leads.ts` `getByPhone` + `createInbound` (dedupe on normalized phone within tenant, audited with idempotency key).
+- `convex/inbound.test.ts` (cross-tenant independence + idempotent re-delivery + wa-phone resolution) and `__tests__/whatsapp/convex-runtime.test.ts` (boundary proof for the exact Convex-runtime lib).
+- `src/app/not-found.tsx` (dynamic) + `force-dynamic` on `/` and root layout (Provider tree cannot be statically prerendered under Next 16/Turbopack; auth-reliant routes are session-dependent by nature).
 
 Changed:
 - `src/app/layout.tsx`: wraps children with `<Providers>` (Convex Auth).
-- `STATUS.md`: Sprint 05 in progress, F1 marked done.
-- **WhatsApp webhook moved to a Convex HTTP action** (`convex/whatsapp.ts` + route in `convex/http.ts`): signature-verified (WebCrypto HMAC-SHA256), fail-closed codes (`invalid_signature`/`malformed_json`/`unknown_wa_number`), tenant resolved via `tenants.getByWaPhoneId`, inbound leads captured idempotently via `leads.createInbound`. Legacy `src/app/api/whatsapp/webhook/route.ts` + `src/lib/whatsapp/garage-lookup.ts` deleted. `tenants` gained `by_wa_phone` index; `convex/inbound.test.ts` proves per-tenant independence + idempotent re-delivery.
+- HTTP routes moved from string form to `http.route({ path, method, handler })` (Convex 1.45 `httpRouter` object API).
+- `STATUS.md`: Sprint 05 progress; F1 + webhook layer + Supabase removal done.
+- `.env.local.example`: legacy Supabase section removed; `CONVEX_SITE_URL` documented as built-in.
+
+Removed:
+- **Supabase entirely**: deps `@supabase/ssr` + `@supabase/supabase-js` uninstalled; `src/lib/supabase/*`, `src/proxy.ts`, `src/lib/auth/permissions.server.ts`, `src/app/api/{leads,customers,vehicles,services}/route.ts`, `src/types/database.ts`, `src/app/api/whatsapp/webhook/route.ts`, `src/lib/whatsapp/garage-lookup.ts`, `db:*` npm scripts. `AGENTS.md` command/conventions updated to Convex-only. Pure `src/lib/whatsapp/{signature,webhook,templates}.ts` retained (tested) until the queue layer consumes them.
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — **61 passed / 13 files / 0 todos** · `npm run build` — succeeds (all routes dynamic).
 
 ### Sprint 04 — Convex Pivot Foundation COMPLETE (2026-09-11)
 **Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7); isolation proof moved from SQL-RLS to the Convex function boundary. Full-suite green (55/55, 0 todos).**

@@ -175,7 +175,7 @@ Supabase → Convex at the architecture level (ADR-002 / D7); Convex full-stack 
 4. [ ] **F8** — Dashboard KPIs + real-time activity feed (Convex reactive queries).
 5. [ ] **F9** — Super admin tenant view + onboard form.
 6. [ ] **F10** — GMB checklist UI persisted in `tenants.metadata`.
-7. [ ] **Sprint 05 (remainder)** — WhatsApp webhook as Convex HTTP action; remove Supabase deps + legacy API routes from the build; `dev:convex` becomes canonical dev flow.
+7. [x] **Sprint 05 (remainder)** — WhatsApp webhook as Convex HTTP action (live); Supabase deps + legacy API routes removed from the build; `dev:convex` canonical. (Open items: Sprint 05 docs/evidence finalization + push.)
 
 ## Sprint 05 — Live Auth + Supabase removal IN PROGRESS
 Done this layer:
@@ -188,12 +188,12 @@ Done this layer:
 - `src/app/(dashboard)/layout.tsx`: dashboard shell with nav.
 - `src/app/(dashboard)/overview/page.tsx`: displays membership via `useQuery(api.members.myProfile)`.
 - `src/lib/convex.ts`: re-exports `api` from `convex/_generated` for clean `@/lib/convex` imports in client code.
+- **WhatsApp webhook → Convex HTTP action** (`convex/http.ts` + `convex/whatsapp.ts`): GET verification + POST with WebCrypto HMAC-SHA256 signature (constant-time), fail-closed codes (`invalid_signature`/`malformed_json`/`unknown_wa_number`); tenant resolved via `tenants.getByWaPhoneId` (new `by_wa_phone` index); lead captured idempotently via `leads.createInbound`; legacy Next route + `garage-lookup.ts` deleted. Canonical parser/signature now live in `convex/lib/whatsapp.ts` (edge-safe), proven by `__tests__/whatsapp/convex-runtime.test.ts` + `convex/inbound.test.ts` (cross-tenant independence, re-delivery idempotency).
+- **Supabase removed from the build**: deps (`@supabase/ssr`, `@supabase/supabase-js`) uninstalled; deleted `src/lib/supabase/*`, `src/proxy.ts`, `src/lib/auth/permissions.server.ts`, 4 legacy CRM API routes, `src/types/database.ts`, `db:*` scripts; `src/app/page.tsx` now force-dynamic + custom `src/app/not-found.tsx` (Provider tree can't be statically prerendered under Next 16/Turbopack); root layout marked `force-dynamic`.
+- `.env.local.example` cleaned (no Supabase vars; `CONVEX_SITE_URL` documented as built-in).
 
 Remaining in Sprint 05:
-- **WhatsApp webhook → Convex HTTP action DONE** (`convex/http.ts` + `convex/whatsapp.ts`: signature-verified, fail-closed; tenant resolved via `tenants.getByWaPhoneId`; lead captured idempotently via `leads.createInbound`; legacy Next route + `garage-lookup.ts` deleted; `tenants` gained `by_wa_phone` index; inbound proof in `convex/inbound.test.ts`).
-- Remove all Supabase: deps (`@supabase/ssr`, `@supabase/supabase-js`), `src/lib/supabase/*`, `src/proxy.ts`, `src/lib/auth/permissions.server.ts`, 4 legacy CRM API routes (`src/app/api/{leads,customers,vehicles,services}/route.ts`).
-- Update `.env.local.example`; remove legacy vars; `dev:convex` becomes canonical dev flow.
-- Sprint 05 docs, evidence, STATUS/CHANGELOG finalization, commit, push.
+- Sprint 05 docs (`docs/sprints/`, `docs/evidence/`), STATUS/CHANGELOG finalization, commit layers, push to `main`.
 
 ## Daniel's action items
 - [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) when Sprint 06 (live WhatsApp) starts. **Note: current check — these are EMPTY in `.env.local`; they will be set via `npx convex env set` at Sprint 06.**
@@ -201,4 +201,4 @@ Remaining in Sprint 05:
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-11 — Sprint 05 in progress: auth wired + dashboard shell + overview green (typecheck clean). Next: WhatsApp webhook as Convex HTTP action + Supabase removal.
+2026-09-11 — Sprint 05 in progress: auth wired; Supabase removed from the build; WhatsApp webhook live as Convex HTTP action (verified, fail-closed, idempotent inbound). Next: Sprint 05 docs/evidence + push, then Sprint 06 (queue/scheduler + live WhatsApp).

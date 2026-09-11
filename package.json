@@ -13,9 +13,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "db:types": "supabase gen types typescript --local > src/types/database.ts",
-    "db:migrate": "supabase db push",
-    "db:reset": "supabase db reset",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,8 +29,6 @@
     "@radix-ui/react-toast": "^1.2.23",
     "@radix-ui/react-tooltip": "^1.2.16",
     "@sentry/nextjs": "^10.74.0",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.116.0",
     "@tanstack/react-query": "^5.102.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
