@@ -4,6 +4,28 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 04 prep — Convex pivot (2026-09-11)
+**Backend replaced at the architecture level: Supabase → Convex (ADR-002 / D7). Full-stack hosting moves to Convex Deployment — no Vercel. SDK foundation begins once the CLI project link is in place.**
+
+Added:
+- **ADR-002** (`docs/adr/ADR-002-convex-backend.md`): Supabase → Convex decision, consequences for the tenant-isolation boundary (SQL RLS → function-enforced authorization), auth model, data-model migration; ADR-001 marked Superseded for the Convex path.
+- **Decision D7** (`docs/decisions.md`): records the pivot, PRD §4 deviation, isolation-proof requirement.
+
+Installed:
+- `convex@1.45.0`, `@convex-dev/auth@0.0.95`, `@auth/core@0.41.3`, `convex-test@0.0.57` (dev), `concurrently` (dev).
+
+Changed:
+- `package.json` scripts: `dev:convex`, `convex:codegen`, `convex:deploy`.
+- `.env.local.example`: `NEXT_PUBLIC_CONVEX_URL`, `CONVEX_SITE_URL`, `ADMIN_KEY`, `CONVEX_CLI_ACCESS_TOKEN` (+ legacy Supabase vars marked for removal in Sprint 05).
+- `docs/runbooks/deployment.md`: Convex full-stack deployment path; Vercel instructions retired; env via `npx convex env set`.
+- `STATUS.md`: Sprint 04 plan in build order; Daniel action items for the one-time CLI link.
+
+Fixed:
+- Pre-existing lint warning (`unused create param` in `__tests__/whatsapp/cross-tenant-queue.test.ts`) — cleared to 0 problems.
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — 48 passing, 4 RLS todos (deferred) · `npm run build` — succeeds.
+
 ### Sprint 03 — 80/20 Execution: P0 Gate + Core Domain (2026-09-11)
 **The critical execution path from "scaffold" to "real module logic with passing gate tests": the two P0 extraction-gate suites now pass on the real module paths, the WhatsApp webhook is signature-verified and fail-closed, and the CRM domain cores are pure, tested, and wired to fail-closed API routes.**
 
