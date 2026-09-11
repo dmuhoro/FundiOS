@@ -31,6 +31,9 @@ export function DashboardNav() {
         <nav className="flex items-center gap-1">
           <NavLink href="/dashboard/overview" label="Overview" active={pathname === "/dashboard/overview"} />
           {profile?.tenantId ? (
+            <NavLink href="/dashboard/marketing" label="Marketing" active={pathname === "/dashboard/marketing"} />
+          ) : null}
+          {profile?.tenantId ? (
             <NavLink href="/dashboard/gmb" label="GMB launch" active={pathname === "/dashboard/gmb"} />
           ) : null}
           {profile?.role === "super_admin" ? (

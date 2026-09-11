@@ -78,6 +78,57 @@ export const overview = query({
   },
 });
 
+export const acquisition = query({
+  args: {},
+  handler: async (ctx) => {
+    const { tenantId } = await requireGarage(ctx);
+    const leads = await ctx.db
+      .query("leads")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .order("desc")
+      .take(500);
+
+    const bySourceMap = new Map<string, number>();
+    const byCampaignMap = new Map<string, number>();
+    let converted = 0;
+    for (const lead of leads) {
+      bySourceMap.set(lead.source, (bySourceMap.get(lead.source) ?? 0) + 1);
+      if (lead.status === "converted") converted += 1;
+      const campaign = lead.campaignKey;
+      if (campaign) {
+        byCampaignMap.set(campaign, (byCampaignMap.get(campaign) ?? 0) + 1);
+      }
+    }
+
+    const bySource = [...bySourceMap.entries()]
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count);
+    const byCampaign = [...byCampaignMap.entries()]
+      .map(([campaign, count]) => ({ campaign, count }))
+      .sort((a, b) => b.count - a.count);
+    const total = leads.length;
+
+    return {
+      total,
+      facebookLeads: bySourceMap.get("facebook") ?? 0,
+      converted,
+      conversionRate: total === 0 ? 0 : Math.round((converted / total) * 100),
+      untracked: leads.filter((l) => !l.campaignKey).length,
+      bySource,
+      byCampaign,
+      recent: leads.slice(0, 8).map((lead) => ({
+        id: lead._id,
+        phone: maskPhone(lead.phone),
+        name: lead.name ?? null,
+        source: lead.source,
+        campaignKey: lead.campaignKey ?? null,
+        status: lead.status,
+        createdAt: lead.createdAt,
+      })),
+    };
+  },
+});
+
 export const activityFeed = query({
   args: {},
   handler: async (ctx) => {

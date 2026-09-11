@@ -259,3 +259,53 @@ describe("Dashboard activity feed", () => {
     expect(feed.length).toBe(1);
   });
 });
+
+describe("Acquisition funnel", () => {
+  it("attributes a campaign-landing capture and masks phone numbers", async () => {
+    const t = convexTest(schema, modules);
+    const now = Date.now();
+    const tenantId = await t.run((ctx) =>
+      ctx.db.insert("tenants", {
+        name: "Quickstop Auto Garage",
+        slug: "quickstop",
+        planTier: "starter",
+        metaVerified: false,
+        metadata: "{}",
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("members", {
+        tenantId,
+        tokenIdentifier: "convex|alice",
+        name: "Alice",
+        role: "owner",
+        active: true,
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
+    const alice = t.withIdentity({ issuer: "convex", subject: "alice" });
+
+    await t.mutation(api.campaigns.captureLandingLead, {
+      slug: "quickstop",
+      phone: "+254700333444",
+      name: "Wanjiru",
+      source: "facebook",
+      campaignKey: "quickstop_awareness",
+    });
+
+    const acquisition = await alice.query(api.dashboard.acquisition);
+    expect(acquisition.total).toBe(1);
+    expect(acquisition.facebookLeads).toBe(1);
+    expect(acquisition.byCampaign).toEqual([
+      { campaign: "quickstop_awareness", count: 1 },
+    ]);
+    expect(acquisition.bySource).toEqual([{ source: "facebook", count: 1 }]);
+    expect(acquisition.untracked).toBe(0);
+    expect(acquisition.recent[0].campaignKey).toBe("quickstop_awareness");
+    expect(acquisition.recent[0].phone).not.toContain("+254700333444");
+    expect(acquisition.recent[0].phone).toContain("•••");
+  });
+});
