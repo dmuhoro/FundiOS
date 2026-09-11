@@ -33,6 +33,8 @@ PASS / FAIL / BLOCKED
 | 2026-09-11 | Sprint 04 — Convex pivot foundation (function-boundary isolation proof 7/7, full suite 55/55, 0 todos) | `sprint-04/closeout.md` | PASS |
 | 2026-09-11 | Sprint 05 — Live auth + Supabase removal (Convex Auth UI + JWT keys, WhatsApp HTTP action boundary proof, Supabase fully removed; 61/61, 0 todos, build green) | `sprint-05/closeout.md` | PASS |
 | 2026-09-11 | Sprint 06 — Durable automation + WhatsApp outbound (idempotency-keyed `automationQueue`, claim/backoff/cap state machine, injectable sender, 5s dispatcher + reminder crons, audits; 72/72, 0 todos, build green) | `sprint-06/closeout.md` | PASS |
+| 2026-09-11 | Sprint 07 — Live product + operator console (branded FundiOS landing at Convex-site root, dashboard KPIs + activity feed, super admin, GMB checklist, Brianna'sOS connector v1; 110/110, 0 todos, deployed; live curl: landing 200, webhook 403-as-intended) | `sprint-07/closeout.md` | PASS |
+| 2026-09-11 | Live FundiOS site — landing 200 + title, webhook route alive (403 not 404) | `sprint-07/fundios-live-site-verified.md` | PASS |
 
 ## Required evidence — pilot-readiness (future)
 

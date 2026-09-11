@@ -4,6 +4,22 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 07 — Live product + operator console COMPLETE (2026-09-11)
+**The product is public: a branded FundiOS landing page served at the live Convex-site root (fixing `no matching routes found`), a dashboard that is a real operator console (8 KPIs + live activity feed, super admin onboarding/registry, GMB launch checklist), and Brianna'sOS connector v1 — a tested, contract-driven, fail-closed socket awaiting live credentials. Full-suite green (110/110, 0 todos), deployed, tagged v0.6.1.**
+
+Added:
+- `convex/lib/landing.ts` (self-contained FundiOS HTML — value prop, capabilities, status, contact; doc links to GitHub blob URLs) + `convex/site.ts` (`serveLanding` HTTP action at `/`) + route in `convex/http.ts`. Live-verified: GET / → 200 `FundiOS — Marketing Operations OS for Automobile Garages`; webhook GET → 403 (intentional, not 404).
+- `convex/dashboard.ts`: `overview` (leads, 7d leads, customers + opt-in %, vehicles, open/completed services, reminders sent, whatsapp sent, queue backlog/failed) and `activityFeed` (merged, time-descending, masked phones). `src/app/(dashboard)/overview/page.tsx` rewritten: 8 KPI cards + live feed.
+- `convex/tenants.ts`: `onboardTenant` (atomic tenant + operator creation; slug validated/uniqueness-checked; refuses slip/quickstop magic slugs; member-not-elsewhere-owned) + `adminSummary` (tenant registry + aggregate counters). `src/app/(dashboard)/admin/page.tsx`: onboarding form + registry table; `dashboard-nav.tsx` Admin link gated to `super_admin`.
+- `convex/gmb.ts` + `gmbChecklists` in `convex/schema.ts`: tenant-scoped checklist state. `src/lib/constants.ts` `GMB_CHECKLIST_ITEMS` (9 stable items). `src/app/(dashboard)/gmb/page.tsx`: saved-progress UI + per-item notes.
+- `src/lib/briannaos/{contract,signature,client}.ts` + `docs/briannaos-connector.md`: contract v1 — 5 outbound / 4 inbound event catalogs, zod envelopes, disjoint names, HMAC-SHA256 sign + constant-time verify, injected-transport client, fail-closed `not_configured`, `invalid_payload`/`http_<status>`/`transport_error` codes, `parseInboundEvent` throws on malformed envelopes. Config keys `BRIANNAS_OS_ENDPOINT` / `BRIANNAS_OS_WEBHOOK_SECRET` (names only) in `.env.local.example`.
+- `docs/evidence/sprint-07/fundios-live-site-verified.md` (PASS).
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — **110 passed / 21 files / 0 todos** · `npm run build` — succeeds.
+- `convex/dashboard.test.ts` (5) · `convex/tenants.test.ts` (8: atomic onboarding, slug dup/magic reject, roles — ordering etc.) · `convex/gmb.test.ts` (5: tenant isolation, unknown-key rejection, allowed-key gate) · `__tests__/site/landing-runtime.test.ts` (4) · `__tests__/briannaos/{contract,client}.test.ts` (16: disjoint catalogs, schema accept/reject, fail-closed unconfigured, signed URL+header, http/transport/invalid mapping, tamper rejection, envelope-throw).
+- Live site redeployed via `npx convex dev --once`; GET / verified 200.
+
 ### Sprint 06 — Durable automation + WhatsApp outbound COMPLETE (2026-09-11)
 **First fully durable notification path: every WhatsApp send is a tenant-scoped, idempotency-keyed job on `automationQueue`, dispatched by a 5s cron through an injectable-transport sender with exponential backoff and a hard 3-attempt cap; reminder sweep schedules template messages for due, opted-in customers. Every terminal state is audited. Full-suite green (72/72, 0 todos).**
 

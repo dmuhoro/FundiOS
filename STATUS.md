@@ -199,6 +199,38 @@ schedules template messages for due, opted-in customers.
   audit, retry→fail cap, processQueue happy/failed paths end-to-end via the
   sender; `__tests__/whatsapp/sender.test.ts` (5) — payload shape + fail-closed.
 
+## Sprint 07 — Live product + operator console COMPLETE (2026-09-11)
+The public product is live and branded FundiOS, the dashboard is a real
+operator console (KPIs + activity feed, super admin, GMB launch checklist), and
+the second integration is a tested, contract-driven socket awaiting live creds.
+
+- **FundiOS live site** — `convex/site.ts` serves a branded landing page at the
+  Convex-site root (was: `no matching routes found`). Live check: GET / → 200,
+  `FundiOS — Marketing Operations OS for Automobile Garages`. Product name is
+  FundiOS everywhere; `confident-weasel-372` is only the auto-generated infra
+  slug (cannot be renamed by Convex). Webhook still at `/api/whatsapp/webhook`.
+- **Dashboard KPIs + activity feed** — `convex/dashboard.ts` `overview` (leads
+  + 7d new, customers + opt-in %, vehicles, open/completed services, reminders
+  sent, whatsapp sent, queue backlog/failed) and `activityFeed` (merged,
+  time-descending automation + lead events, masked phones); overview page
+  renders 8 KPI cards + feed, all reactive.
+- **Super admin** — `convex/tenants.ts` `onboardTenant` (atomic create tenant +
+  operator; slug validated/unique, member not already owned) and `adminSummary`
+  (cross-tenant aggregates); `/dashboard/admin` onboarding form + tenant
+  registry; nav link only for `super_admin`.
+- **GMB launch checklist** — `convex/gmb.ts` + `gmbChecklists` table (9 stable
+  items from `GMB_CHECKLIST_ITEMS`); save/read tenant-scoped; `/dashboard/gmb`
+  progress UI + notes.
+- **Brianna'sOS connector** — contract v1 (`src/lib/briannaos/*`): 5 outbound /
+  4 inbound event catalogs, zod envelopes, HMAC-SHA256 sign + constant-time
+  verify, injectable-transport client, fail-closed `not_configured`. **Live
+  wiring BLOCKED on endpoint + secret** (hand-off checklist in
+  `docs/briannaos-connector.md`).
+- Proof: `convex/dashboard.test.ts` (5) · `convex/tenants.test.ts` (8) ·
+  `convex/gmb.test.ts` (5) · `__tests__/site/landing-runtime.test.ts` (4) ·
+  `__tests__/briannaos/*` (16). Full gate: **110 tests / 21 files / 0 todos**,
+  lint 0, typecheck 0, build green; live site redeployed + verified.
+
 ## Sprint 05 — Live Auth + Supabase removal COMPLETE (2026-09-11)
 Done this layer:
 - JWT keys (`JWT_PRIVATE_KEY`/`JWKS`) generated and set on Convex dev deployment.
@@ -218,9 +250,9 @@ Remaining in Sprint 05:
 - Sprint 05 docs (`docs/sprints/`, `docs/evidence/`), STATUS/CHANGELOG finalization, commit layers, push to `main`.
 
 ## Daniel's action items
-- [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) when Sprint 06 (live WhatsApp) starts. **Note: current check — these are EMPTY in `.env.local`; they will be set via `npx convex env set` at Sprint 06.**
-- [ ] Provide the **Brianna'sOS connecting-layer spec** (data moved, direction, auth, sync cadence, endpoints) — agent will define and build the whole connector; the business contract is the one open input.
+- [ ] Provide WhatsApp Business Cloud credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`) — set via `npx convex env set` when live WhatsApp goes to a real business number. Sender is proven end-to-end but fail-closed `not_configured` until creds land.
+- [ ] Provide the **Brianna'sOS endpoint + webhook secret** and confirm the data-direction list — everything else (contract, signing, client, tests) is done; this unblocks the live round-trip (see `docs/briannaos-connector.md` hand-off checklist).
 - [ ] M-Pesa Daraja keys for the pilot (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, etc.) — needed when service payments go live (deferred from scaffolding).
 
 ## Last updated
-2026-09-11 — Sprint 05 in progress: auth wired; Supabase removed from the build; WhatsApp webhook live as Convex HTTP action (verified, fail-closed, idempotent inbound). Next: Sprint 05 docs/evidence + push, then Sprint 06 (queue/scheduler + live WhatsApp).
+2026-09-11 — Sprint 07 COMPLETE: FundiOS live site (branded landing at Convex-site root, previously `no matching routes found`), dashboard KPIs + activity feed, super admin onboarding/registry, GMB checklist, Brianna'sOS connector (contract v1, tested, live-wiring blocked on creds). Gate 110 tests / 21 files, lint/typecheck/build green, redeployed + verified. v0.6.1 tagged & released.
