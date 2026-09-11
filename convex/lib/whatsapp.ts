@@ -66,6 +66,7 @@ function parseEnvelope(payload: unknown) {
     messageId: message.id,
     timestamp: message.timestamp,
     text: message.text?.body ?? "",
+    profileName: change.value.contacts?.[0]?.profile?.name ?? null,
   };
 }
 
@@ -107,6 +108,7 @@ export type InboundWhatsAppMessage = {
   messageId: string;
   timestamp: string;
   text: string;
+  profileName: string | null;
 };
 
 export function parseWhatsAppEnvelope(
@@ -129,21 +131,7 @@ export function parseWhatsAppEnvelope(
       messageId: result.messageId,
       timestamp: result.timestamp,
       text: result.text,
+      profileName: result.profileName,
     },
   };
-}
-
-export function buildLeadAutoReply(input: {
-  garageName: string;
-  name?: string | null;
-  language?: "en" | "sw";
-}): string {
-  const isSw = input.language === "sw";
-  const displayName = input.name?.trim() || null;
-  if (isSw) {
-    const greet = displayName ? `Hujambo ${displayName}!` : "Hujambo!";
-    return `${greet} Asante kwa kuwasiliana na ${input.garageName}. Mshauri wetu atakujibu ndani ya saa 2. Ili tusaidie haraka, tafadhali tuambie make, modeli na mwaka wa gari lako.`;
-  }
-  const greet = displayName ? `Hi ${displayName}!` : "Hi there!";
-  return `${greet} Thanks for reaching ${input.garageName}. An advisor will reply within 2 hours. To help you faster, share your vehicle's make, model, and year.`;
 }

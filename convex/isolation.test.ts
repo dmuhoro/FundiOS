@@ -384,7 +384,7 @@ describe("Tenant isolation", () => {
 
     const services = await user.query(api.services.listByVehicle, { vehicleId });
     expect(services).toHaveLength(2);
-    const total = services.reduce((sum, s) => sum + (s.amountMinor ?? 0), 0);
+    const total = services.reduce<number>((sum, s) => sum + (s.amountMinor ?? 0), 0);
     expect(total).toBe(10250);
     expect(total / 100).toBe(102.5);
   });

@@ -170,14 +170,36 @@ Supabase → Convex at the architecture level (ADR-002 / D7); Convex full-stack 
 
 ### Stubbed / next (in build order — largest/highest-value first)
 1. [x] **F1** — Live auth flow: Convex Auth email+password, session UI, `requireGarage()` on dashboard layout, RBAC end-to-end (replaces Supabase Auth; ADR-002). ✅ JWT keys set on Convex, middleware + root provider, login/signup UI, dashboard shell + overview with membership query.
-2. [ ] **F6 (remaining)** — Convex-backed queue adapter + scheduler replacing the in-memory queue store (`src/lib/queue/notification-queue.ts`); webhook POST enqueue live.
-3. [ ] **F7** — Reminder cron (`convex/scheduler.ts` / scheduled mutation) using `selectReminderCandidates` core; `automation_logs` idempotency on send.
+2. [x] **F6 (remaining)** — Durable Convex-backed queue + sender + scheduler: `automationQueue` table, `enqueue` (idempotent), `processQueue` action (retry with exponential backoff, 3-attempt cap), `whatsappSender` (injectable transport, fail-closed creds), 5-second dispatcher cron; webhook auto-reply enqueued immediately on inbound.
+3. [x] **F7** — Reminder cron (`reminders.fireDueReminders` sweep at 08:00 EAT daily): services due within `REMINDER_WINDOW_DAYS` + `waOptIn` → `automationQueue` (idempotent), `reminderSent` patched on service. 0 8 * * * + dispatcher 5s cron via `crons.ts`.
 4. [ ] **F8** — Dashboard KPIs + real-time activity feed (Convex reactive queries).
 5. [ ] **F9** — Super admin tenant view + onboard form.
 6. [ ] **F10** — GMB checklist UI persisted in `tenants.metadata`.
 7. [x] **Sprint 05 (remainder)** — WhatsApp webhook as Convex HTTP action (live); Supabase deps + legacy API routes removed from the build; `dev:convex` canonical. (Open items: Sprint 05 docs/evidence finalization + push.)
 
-## Sprint 05 — Live Auth + Supabase removal IN PROGRESS
+## Sprint 06 — Durable automation + WhatsApp outbound COMPLETE (2026-09-11)
+Live WhatsApp round-trip: inbound webhook captures the lead and enqueues the
+auto-reply; the durable queue dispatches via the Meta Graph API (5s cron) with
+exponential backoff and a hard failure cap; reminder sweep runs daily and
+schedules template messages for due, opted-in customers.
+
+- `convex/queue.ts` — `enqueue` (idempotency-keyed), `dueJobs`, `claimJob`,
+  `finalizeJob`, `failJob`, `processQueue` action; claim increments attempts,
+  backoff `2^attempts` (capped 5 min), 3-attempt cap → `failed` + audit.
+- `convex/lib/whatsappSender.ts` — Meta Graph API text send, injectable
+  transport (test-only), fail-closed `not_configured` when creds absent.
+- `convex/crons.ts` — `whatsappDispatcher` (every 5s) +
+  `serviceReminderSweep` (0 8 * * *).
+- `convex/reminders.ts` — due+opt-in sweep → idempotent enqueue, marks
+  `reminderSent`; joins vehicles for make/model in the template.
+- `convex/whatsapp.ts` — inbound now queues `whatsapp_outbound` auto-reply
+  (personalized greeting, EN/SW), key `whatsapp_reply|<tenant>|<messageId>`.
+- Parser gained `profileName`; schema added `automationQueue`.
+- Proof: `convex/queue.test.ts` (6) — dedupe, claim state machine, dispatch
+  audit, retry→fail cap, processQueue happy/failed paths end-to-end via the
+  sender; `__tests__/whatsapp/sender.test.ts` (5) — payload shape + fail-closed.
+
+## Sprint 05 — Live Auth + Supabase removal COMPLETE (2026-09-11)
 Done this layer:
 - JWT keys (`JWT_PRIVATE_KEY`/`JWKS`) generated and set on Convex dev deployment.
 - `src/middleware.ts`: `convexAuthNextjsMiddleware` gates all non-public routes; public routes `/login`, `/sign-up`, `/api/auth(.*)`.

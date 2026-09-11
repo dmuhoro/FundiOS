@@ -1,5 +1,6 @@
 import { httpAction } from "./_generated/server";
 import { api } from "./_generated/api";
+import { buildLeadAutoReply } from "@/lib/whatsapp/templates";
 import { verifyWhatsAppSignature, parseWhatsAppEnvelope } from "./lib/whatsapp";
 
 export const handleWebhook = httpAction(async (ctx, request) => {
@@ -68,12 +69,28 @@ export const handleWebhook = httpAction(async (ctx, request) => {
   await ctx.runMutation(api.leads.createInbound, {
     tenantId: tenant._id,
     phone: parsed.message.fromPhone,
+    name: parsed.message.profileName ?? undefined,
     source: "whatsapp",
   });
 
-  // TODO Sprint 06: durable queue + outbound reply
+  const reply = buildLeadAutoReply({
+    garageName: tenant.name,
+    name: parsed.message.profileName,
+  });
+  await ctx.runMutation(api.queue.enqueue, {
+    tenantId: tenant._id,
+    type: "whatsapp_outbound",
+    payload: JSON.stringify({
+      to: parsed.message.fromPhone,
+      phoneNumberId: tenant.waPhoneId ?? "",
+      message: reply,
+      source: "lead_auto_reply",
+    }),
+    idempotencyKey: `whatsapp_reply|${tenant._id}|${parsed.message.messageId}`,
+  });
+
   return new Response(
-    JSON.stringify({ status: "ok" }),
+    JSON.stringify({ status: "ok", queued: "whatsapp_outbound" }),
     { status: 200, headers: { "Content-Type": "application/json" } },
   );
 });

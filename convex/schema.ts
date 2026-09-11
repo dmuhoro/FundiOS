@@ -170,7 +170,34 @@ const schema = defineSchema({
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
     createdAt: v.number(),
-  }).index("by_tenant", ["tenantId"]),
+  })
+    .index("by_tenant", ["tenantId"]),
+
+  automationQueue: defineTable({
+    tenantId: v.id("tenants"),
+    type: v.union(
+      v.literal("whatsapp_outbound"),
+      v.literal("whatsapp_reminder"),
+    ),
+    payload: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("retrying"),
+      v.literal("dispatched"),
+      v.literal("failed"),
+    ),
+    idempotencyKey: v.string(),
+    attemptCount: v.number(),
+    maxAttempts: v.number(),
+    nextAttemptAt: v.number(),
+    lastError: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tenant", ["tenantId"])
+    .index("by_idempotency", ["idempotencyKey"])
+    .index("by_due", ["status", "nextAttemptAt"]),
 });
 
 export default schema;

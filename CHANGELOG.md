@@ -4,6 +4,30 @@ All notable changes are documented here. Format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Sprint 06 — Durable automation + WhatsApp outbound COMPLETE (2026-09-11)
+**First fully durable notification path: every WhatsApp send is a tenant-scoped, idempotency-keyed job on `automationQueue`, dispatched by a 5s cron through an injectable-transport sender with exponential backoff and a hard 3-attempt cap; reminder sweep schedules template messages for due, opted-in customers. Every terminal state is audited. Full-suite green (72/72, 0 todos).**
+
+Added:
+- `convex/schema.ts`: `automationQueue` table — `status` (pending/processing/retrying/dispatched/failed), `attemptCount`, `maxAttempts`, `nextAttemptAt`, `idempotencyKey`, `lastError`; indexes `by_tenant`, `by_idempotency`, `by_due` (`[status, nextAttemptAt]`).
+- `convex/lib/jobs.ts`: `enqueueJob` (check-then-insert dedupe on idempotency key + `queue_enqueued` audit) and `backoffMs` (2^n seconds, 5-minute cap).
+- `convex/queue.ts`: `enqueue`, `dueJobs` (pending then retrying within batch), `claimJob` (pending/retrying → processing, increments attempts, refuses stale claims), `finalizeJob` (dispatched + `whatsapp_sent` audit), `failJob` (retrying w/ backoff < max, `failed` at cap + audit, explicit `whatsapp_retry`/`whatsapp_send_failed`), `processQueue` action (zod-validated payload, end-to-end dispatch via the sender, returns `{scanned, dispatched, failed}`).
+- `convex/lib/whatsappSender.ts`: Meta Graph API text send (`WHATSAPP_BASE_URL`/`phoneNumberId/messages`), injectable `Transport`, fail-closed `not_configured` when creds absent, `http_<status>` / `transport_error` codes, `setTransportForTests` (guarded to `NODE_ENV==="test"`).
+- `convex/crons.ts`: `whatsappDispatcher` (every 5s → `processQueue`) + `serviceReminderSweep` (0 8 * * * → `fireDueReminders`), both via `api.*` references.
+- `convex/reminders.ts`: `fireDueReminders` — joins services→customers→vehicles per tenant, selects due (`nextServiceAt` ≤ now + `REMINDER_WINDOW_DAYS`) + `waOptIn` + not already reminded, enqueues `whatsapp_reminder` (idempotency key `reminder|<tenant>|<service>`), patches `reminderSent`. Returns `{enqueued}`.
+- `convex/whatsapp.ts`: inbound webhook now enqueues `whatsapp_outbound` auto-reply (key `whatsapp_reply|<tenant>|<messageId>`); `convex/lib/whatsapp.ts` parser gains `profileName` (contact name used in the greeting); `buildLeadAutoReply`/`buildFollowUpReminder` imported from `@/lib/whatsapp/templates`.
+
+Changed:
+- `eslint.config.mjs`: `@typescript-eslint/no-unused-vars` relaxed for `^_`-prefixed args (test doubles).
+- `convex/isolation.test.ts`: explicit `reduce<number>` (strict inference).
+
+Removed:
+- Inline `buildLeadAutoReply` copy from `convex/lib/whatsapp.ts` (single source of truth in `src/lib/whatsapp/templates.ts`).
+
+Verified:
+- `npm run lint` — 0 problems · `npm run typecheck` — 0 errors · `npm test` — **72 passed / 15 files / 0 todos** · `npm run build` — succeeds.
+- `convex/queue.test.ts` (6): idempotent dedupe; claim state machine; finalize + `whatsapp_sent` audit; retry→cap→failed + audit; `processQueue` end-to-end happy path (fake transport → dispatched) and failure path (500 → retrying w/ `lastError`).
+- `__tests__/whatsapp/sender.test.ts` (5): `not_configured` (token + phoneNumberId), correct Graph payload via injected transport, `http_429`, `transport_error`.
+
 ### Sprint 05 — Live Auth + Supabase removal COMPLETE (2026-09-11)
 **Convex Auth wired end-to-end (password provider + JWT keys, middleware gating, login/signup UI, dashboard shell); WhatsApp webhook now a Convex HTTP action; all Supabase code removed from the build. Full-suite green (61/61, 0 todos).**
 

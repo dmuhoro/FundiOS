@@ -84,6 +84,7 @@ describe("Convex-runtime WhatsApp boundary", () => {
       messageId: "wamid.HBgNNDUxMzE2MDU5NDE=",
       timestamp: "1693352763",
       text: "My Fielder is making a noise.",
+      profileName: "Nyaga M.",
     });
   });
 

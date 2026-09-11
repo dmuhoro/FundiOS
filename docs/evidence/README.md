@@ -32,6 +32,7 @@ PASS / FAIL / BLOCKED
 | 2026-09-11 | Sprint 03 — 80/20 execution (P0 gate suites on real module paths, signature-verified webhook, CRM cores) | `sprint-03/closeout.md` | PASS |
 | 2026-09-11 | Sprint 04 — Convex pivot foundation (function-boundary isolation proof 7/7, full suite 55/55, 0 todos) | `sprint-04/closeout.md` | PASS |
 | 2026-09-11 | Sprint 05 — Live auth + Supabase removal (Convex Auth UI + JWT keys, WhatsApp HTTP action boundary proof, Supabase fully removed; 61/61, 0 todos, build green) | `sprint-05/closeout.md` | PASS |
+| 2026-09-11 | Sprint 06 — Durable automation + WhatsApp outbound (idempotency-keyed `automationQueue`, claim/backoff/cap state machine, injectable sender, 5s dispatcher + reminder crons, audits; 72/72, 0 todos, build green) | `sprint-06/closeout.md` | PASS |
 
 ## Required evidence — pilot-readiness (future)
 
